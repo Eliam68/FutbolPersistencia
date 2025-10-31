@@ -45,6 +45,7 @@ El proyecto permite:
        & 'C:\xampp\mysql\bin\mysql.exe' -u root < 'persistence\sql\futbol_persistence.sql'
        ```
      - Si tienes contraseña en MySQL, añade `-p` al comando.
+     Opción C (Heidi): En el repositorio hay un sql ejecútalo en Heidi.
 
 3. **Configura credenciales de BD:**
    - Edita `persistence/conf/credentials.json` con tus datos de conexión (por defecto usa root sin contraseña):
@@ -58,7 +59,7 @@ El proyecto permite:
      ```
 
 4. **Despliega en XAMPP:**
-   - Copia la carpeta del proyecto a `C:\xampp\htdocs\DAM1\DesarrolloWeb\FutbolPersistencia` (o ajusta según tu estructura).
+   - Copia la carpeta del proyecto a `C:\xampp\htdocs\DAM1\DesarrolloWeb\FutbolPersistencia` (o ajusta según tu estructura 'Recomendado').
    - Accede a http://localhost/DAM1/DesarrolloWeb/FutbolPersistencia/index.php.
 
 5. **Verifica:**
@@ -143,11 +144,6 @@ FutbolPersistencia/
 - **Frameworks:** Migrar a Laravel/Symfony para estructura MVC completa.
 - **Responsive:** Mejorar con Bootstrap grids o Tailwind.
 
-### DevOps
-- **Docker:** Contenedorizar (Dockerfile con PHP + MySQL).
-- **CI/CD:** GitHub Actions para linting (PHPStan) y tests.
-- **Deployment:** Scripts para producción (ej. en Heroku/VPS).
-
 ### Otros
 - **Logging:** Añadir Monolog para errores/DB.
 - **Internacionalización:** Soporte multi-idioma (gettext).
@@ -161,10 +157,6 @@ FutbolPersistencia/
 4. Push y abre PR.
 
 **Estándares:** Usa PSR-12 para PHP, commits atómicos, tests para cambios.
-
-## Licencia
-
-MIT License - ver LICENSE si existe.
 
 ## Notas para Desarrolladores
 
