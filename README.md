@@ -1,4 +1,4 @@
-# FutbolPersistencia
+# FútbolPersistencia
 
 Una aplicación web PHP para gestionar equipos y partidos de fútbol, con persistencia en base de datos MySQL. Enfocada en la capa de datos (DAO pattern) y validaciones del lado del servidor, sin dependencias de JavaScript para la lógica principal.
 
@@ -59,7 +59,7 @@ El proyecto permite:
      ```
 
 4. **Despliega en XAMPP:**
-   - Copia la carpeta del proyecto a `C:\xampp\htdocs\DAM1\DesarrolloWeb\FutbolPersistencia` (o ajusta según tu estructura 'Recomendado').
+   - Copia la carpeta del proyecto a `C:\xampp\htdocs\DAM1\DesarrolloWeb\FutbolPersistencia` (o ajusta según tu estructura. Recomendado).
    - Accede a http://localhost/DAM1/DesarrolloWeb/FutbolPersistencia/index.php.
 
 5. **Verifica:**

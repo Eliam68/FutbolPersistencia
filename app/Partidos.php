@@ -88,7 +88,7 @@ if ($selectedJornadaId > 0) {
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Partidos - Futbol</title>
+    <title>Partidos - Fútbol</title>
     <?php require_once __DIR__ . '/../templates/head.php'; ?>
 </head>
 <body class="d-flex flex-column min-vh-100">
