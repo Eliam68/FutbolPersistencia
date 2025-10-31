@@ -32,3 +32,16 @@
   <?php include __DIR__ . '/templates/footer.php'; ?>
 </body>
 </html>
+<?php
+require_once __DIR__ . '/utils/SessionHelper.php';
+
+SessionHelper::startSessionIfNotStarted();
+
+// Lógica de redirección según sesión
+if (isset($_SESSION['equipo_consultado_id'])) {
+// Si el usuario consultó un equipo, redirigir a PartidosEquipo de ese equipo
+header('Location: /DAM1/DesarrolloWeb/FutbolPersistencia/app/PartidosEquipo.php?team=' . intval($_SESSION['equipo_consultado_id']));
+exit;
+}
+// Si no hay sesión se muestra el index por defecto
+?>

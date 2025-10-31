@@ -1,5 +1,7 @@
 <?php 
 
+require_once __DIR__ . '/GenericDAO.php';
+
 /**
  * Class EquiposDAO
  *
@@ -29,7 +31,7 @@ class EquiposDAO extends GenericDAO {
         $teams = array();
         while ($teamBD = mysqli_fetch_array($result)) {
         $team = array(
-            'id' => $teamBD["id"],
+            'Id' => $teamBD["id"],
             'nombre' => $teamBD["nombre"],
             'estadio' => $teamBD["estadio"],
         );
@@ -51,6 +53,7 @@ class EquiposDAO extends GenericDAO {
         mysqli_stmt_execute($stmt);
         mysqli_stmt_bind_result($stmt, $id, $nombre, $estadio);
 
+        $team = null;
         while (mysqli_stmt_fetch($stmt)) {
         $team = array(
             'id' => $id,
@@ -58,7 +61,7 @@ class EquiposDAO extends GenericDAO {
             'estadio' => $estadio,
         );
         }
-        return isset($team) ? $team : null;
+        return $team;
     }
 
     /**
