@@ -47,7 +47,7 @@ CREATE TABLE IF NOT EXISTS `partidos` (
   `Equipo-Visitante-Id` INT NOT NULL,
   `Jornada-Id` INT NOT NULL,
   `Resultado` ENUM('1','X','2') NULL DEFAULT NULL,
-  `Estadio` VARCHAR(150) NULL DEFAULT NULL,
+  `Estadio` VARCHAR(150) NOT NULL,
   
   PRIMARY KEY (`Id`),
   UNIQUE KEY `unique_partido_jornada` (`Equipo-Local-Id`, `Equipo-Visitante-Id`, `Jornada-Id`),

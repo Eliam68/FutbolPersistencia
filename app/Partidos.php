@@ -13,19 +13,49 @@ $conn = PersistentManager::getInstance()->get_connection();
 $message = null;
 $error = null;
 
+// Obtener jornadas y equipos 
+$jornadas = array();
+$res = mysqli_query($conn, "SELECT Id, numero FROM jornadas ORDER BY numero");
+if ($res) {
+    while ($r = mysqli_fetch_assoc($res)) {
+        $jornadas[] = $r;
+    }
+}
+
+$equipos = $equiposDAO->selectAll();
+$equiposMap = array();
+foreach ($equipos as $e) {
+    $equiposMap[$e['id']] = $e;
+}
+
+// Variables para el formulario
+$equipoLocalSeleccionado = intval($_POST['equipo_local'] ?? 0);
+$equipoVisitanteSeleccionado = intval($_POST['equipo_visitante'] ?? 0);
+$jornadaSeleccionada = intval($_POST['jornada_id'] ?? 0);
+$resultadoSeleccionado = $_POST['resultado'] ?? '';
+$estadioActual = trim($_POST['estadio'] ?? '');
+
 // Manejo del formulario de inserción de partido
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $equipo_local = intval($_POST['equipo_local'] ?? 0);
-    $equipo_visitante = intval($_POST['equipo_visitante'] ?? 0);
-    $jornada_id = intval($_POST['jornada_id'] ?? 0);
+    $equipo_local = $equipoLocalSeleccionado;
+    $equipo_visitante = $equipoVisitanteSeleccionado;
+    $jornada_id = $jornadaSeleccionada;
     $resultado = $_POST['resultado'] ?? null;
-    $estadio = trim($_POST['estadio'] ?? '');
+    $estadio = $estadioActual;
+
 
     // Validaciones básicas
     if ($equipo_local <= 0 || $equipo_visitante <= 0 || $jornada_id <= 0) {
         $error = 'Equipo local, visitante y jornada son obligatorios.';
     } elseif ($equipo_local === $equipo_visitante) {
         $error = 'Los equipos deben ser distintos.';
+    } elseif ($estadio === '') {
+        $error = 'Es necesario tener un estadio. Se pondrá el estadio oficial del equipo local. Pero puedes cambiarlo.';
+        // Si no hay estadio pero sí equipo local, se rellena automáticamente con el del equipo local
+        if ($estadio === '' && $equipo_local > 0 && isset($equiposMap[$equipo_local])) {
+            $estadio = $equiposMap[$equipo_local]['estadio'];
+            $estadioActual = $estadio;
+        }
     } elseif (!in_array($resultado, ['1', 'X', '2', null, ''], true)) {
         $error = 'Resultado inválido.';
     } else {
@@ -33,7 +63,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($partidosDAO->partidoExists($equipo_local, $equipo_visitante, $jornada_id)) {
             $error = 'Ya existe un partido entre esos equipos en la jornada seleccionada.';
         } else {
-            $inserted = $partidosDAO->insert($equipo_local, $equipo_visitante, $jornada_id, $resultado ?: null, $estadio ?: null);
+            $inserted = $partidosDAO->insert($equipo_local, $equipo_visitante, $jornada_id, $resultado ?: null, $estadio);
             if ($inserted) {
                 // Evitar reenvío: redirigir a la misma jornada
                 header('Location: ' . $_SERVER['PHP_SELF'] . '?jornada=' . $jornada_id);
@@ -45,25 +75,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-// Obtener jornadas disponibles
-$jornadas = array();
-$res = mysqli_query($conn, "SELECT Id, numero FROM jornadas ORDER BY numero");
-if ($res) {
-    while ($r = mysqli_fetch_assoc($res)) {
-        $jornadas[] = $r;
-    }
-}
-
 $selectedJornadaId = intval($_GET['jornada'] ?? ($jornadas[0]['Id'] ?? 0));
 $partidos = array();
 if ($selectedJornadaId > 0) {
     $partidos = $partidosDAO->getByJornada($selectedJornadaId);
-}
-
-$equipos = $equiposDAO->selectAll();
-$equiposMap = array();
-foreach ($equipos as $e) {
-    $equiposMap[$e['id']] = $e;
 }
 
 ?>
@@ -142,13 +157,13 @@ foreach ($equipos as $e) {
                     <div class="alert alert-success"><?php echo htmlspecialchars($message, ENT_QUOTES, 'UTF-8'); ?></div>
                 <?php endif; ?>
 
-                <form method="post">
+                <form method="post" id="formPartido" novalidate>
                     <div class="mb-3">
                         <label class="form-label">Equipo local</label>
-                        <select name="equipo_local" class="form-select" required>
+                        <select name="equipo_local" class="form-select" required onchange="this.form.submit()">
                             <option value="">-- Seleccione --</option>
                             <?php foreach ($equipos as $eq): ?>
-                                <option value="<?php echo $eq['id']; ?>"><?php echo htmlspecialchars($eq['nombre'], ENT_QUOTES, 'UTF-8'); ?></option>
+                                <option value="<?php echo $eq['id']; ?>" <?php echo ($eq['id'] == $equipoLocalSeleccionado) ? 'selected' : ''; ?>><?php echo htmlspecialchars($eq['nombre'], ENT_QUOTES, 'UTF-8'); ?></option>
                             <?php endforeach; ?>
                         </select>
                     </div>
@@ -158,7 +173,7 @@ foreach ($equipos as $e) {
                         <select name="equipo_visitante" class="form-select" required>
                             <option value="">-- Seleccione --</option>
                             <?php foreach ($equipos as $eq): ?>
-                                <option value="<?php echo $eq['id']; ?>"><?php echo htmlspecialchars($eq['nombre'], ENT_QUOTES, 'UTF-8'); ?></option>
+                                <option value="<?php echo $eq['id']; ?>" <?php echo ($eq['id'] == $equipoVisitanteSeleccionado) ? 'selected' : ''; ?>><?php echo htmlspecialchars($eq['nombre'], ENT_QUOTES, 'UTF-8'); ?></option>
                             <?php endforeach; ?>
                         </select>
                     </div>
@@ -168,7 +183,7 @@ foreach ($equipos as $e) {
                         <select name="jornada_id" class="form-select" required>
                             <option value="">-- Seleccione --</option>
                             <?php foreach ($jornadas as $j): ?>
-                                <option value="<?php echo $j['Id']; ?>" <?php echo ($j['Id'] == $selectedJornadaId) ? 'selected' : ''; ?>>Jornada <?php echo htmlspecialchars($j['numero'], ENT_QUOTES, 'UTF-8'); ?></option>
+                                <option value="<?php echo $j['Id']; ?>" <?php echo ($j['Id'] == ($jornadaSeleccionada ?: $selectedJornadaId)) ? 'selected' : ''; ?>>Jornada <?php echo htmlspecialchars($j['numero'], ENT_QUOTES, 'UTF-8'); ?></option>
                             <?php endforeach; ?>
                         </select>
                     </div>
@@ -176,16 +191,16 @@ foreach ($equipos as $e) {
                     <div class="mb-3">
                         <label class="form-label">Resultado (1 X 2) - opcional</label>
                         <select name="resultado" class="form-select">
-                            <option value="">-</option>
-                            <option value="1">1</option>
-                            <option value="X">X</option>
-                            <option value="2">2</option>
+                            <option value="" <?php echo ($resultadoSeleccionado === '' || $resultadoSeleccionado === null) ? 'selected' : ''; ?>>-</option>
+                            <option value="1" <?php echo ($resultadoSeleccionado === '1') ? 'selected' : ''; ?>>1</option>
+                            <option value="X" <?php echo ($resultadoSeleccionado === 'X') ? 'selected' : ''; ?>>X</option>
+                            <option value="2" <?php echo ($resultadoSeleccionado === '2') ? 'selected' : ''; ?>>2</option>
                         </select>
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label">Estadio (opcional)</label>
-                        <input name="estadio" class="form-control">
+                        <label class="form-label">Estadio (del equipo local por defecto)</label>
+                        <input name="estadio" class="form-control" value="<?php echo htmlspecialchars($estadioActual, ENT_QUOTES, 'UTF-8'); ?>">
                     </div>
 
                     <button class="btn btn-primary" type="submit">Añadir partido</button>
@@ -197,6 +212,3 @@ foreach ($equipos as $e) {
     <?php include __DIR__ . '/../templates/footer.php'; ?>
 </body>
 </html>
-<?php
-require_once __DIR__ . '/../templates/header.php';
-?>

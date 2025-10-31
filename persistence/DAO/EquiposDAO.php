@@ -26,16 +26,12 @@ class EquiposDAO extends GenericDAO {
      * @return array
      */
     public function selectAll() {
-        $query = "SELECT * FROM " . $this->tableName;
+        #Cometí el error de añadir en la bbdd los id con Id. Pero la forma correcta en php es usar id minúscula. Por lo que esta vez puse esto para que funcionase. Pero la proxima vez pondré en la BBDD id minúscula.
+        $query = "SELECT `Id` as id, `nombre`, `estadio` FROM " . $this->tableName;
         $result = mysqli_query($this->conn, $query);
         $teams = array();
-        while ($teamBD = mysqli_fetch_array($result)) {
-        $team = array(
-            'Id' => $teamBD["id"],
-            'nombre' => $teamBD["nombre"],
-            'estadio' => $teamBD["estadio"],
-        );
-        array_push($teams, $team);
+        while ($teamBD = mysqli_fetch_assoc($result)) {
+            $teams[] = $teamBD;
         }
         return $teams;
     }

@@ -92,14 +92,22 @@ class PartidosDAO extends GenericDAO {
 
     /**
      * Inserta un nuevo partido, previa comprobación de duplicados.
+     * @param int $equipoLocalId ID del equipo local
+     * @param int $equipoVisitanteId ID del equipo visitante
+     * @param int $jornadaId ID de la jornada
+     * @param string|null $resultado Resultado (1, X, 2, o null)
+     * @param string $estadio Estadio donde se juega (No puede ser null, se le asignará el estadio del equipo local)
      * @return bool true si insertado correctamente, false si ya existe o error.
      */
-    public function insert($equipoLocalId, $equipoVisitanteId, $jornadaId, $resultado = null, $estadio = null) {
+    public function insert($equipoLocalId, $equipoVisitanteId, $jornadaId, $resultado = null, $estadio = '') {
         // Validaciones mínimas
         if ($equipoLocalId == $equipoVisitanteId) {
             return false;
         }
         if ($jornadaId <= 0) {
+            return false;
+        }
+        if (empty($estadio)) {
             return false;
         }
 
@@ -110,7 +118,7 @@ class PartidosDAO extends GenericDAO {
 
         $query = "INSERT INTO `" . $this->tableName . "` (`Equipo-Local-Id`, `Equipo-Visitante-Id`, `Jornada-Id`, `Resultado`, `Estadio`) VALUES (?, ?, ?, ?, ?)";
         $stmt = mysqli_prepare($this->conn, $query);
-        // resultado y estadio pueden ser null
+        
         mysqli_stmt_bind_param($stmt, 'iiiss', $equipoLocalId, $equipoVisitanteId, $jornadaId, $resultado, $estadio);
         $executed = mysqli_stmt_execute($stmt);
         return $executed;
